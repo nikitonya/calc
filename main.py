@@ -9,6 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 
 
 class Ui_MainWindow(object):
@@ -147,6 +148,8 @@ class Ui_MainWindow(object):
 
         self.add_functions()
 
+        self.is_equal = False
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Калькулятор"))
@@ -186,12 +189,39 @@ class Ui_MainWindow(object):
         self.btn_equally.clicked.connect(self.results)
 
     def write_number(self, number):
-        if self.label_result.text() == "0":
+        if self.label_result.text() == "0" or self.is_equal:
             self.label_result.setText(number)
+            self.is_equal = False
+
         else:
             self.label_result.setText(self.label_result.text() + number)
 
     def results(self):
+        if not self.is_equal:
+            res = eval(self.label_result.text())
+            self.label_result.setText("Результат: " + str(res))
+            self.is_equal = True
+        else:
+            error = QMessageBox()
+            error.setWindowTitle("Ошибка")
+            error.setText("Сейчас это действие выполнить нельзя")
+            error.setIcon(QMessageBox.Warning)
+            error.setStandardButtons(QMessageBox.Reset | QMessageBox.Cancel | QMessageBox.Ok)
+
+            error.setDefaultButton(QMessageBox.Ok)
+            error.setInformativeText("Два раза действие не выполнить")
+            error.setDetailedText("Детали")
+
+            error.buttonClicked.connect(self.popup_action)
+
+            error.exec_()
+
+    def popup_action(self, btn):
+        if btn.text() == "Ok":
+            print("Print ok")
+        elif btn.text() == "Reset":
+            self.label_result.setText("")
+            self.is_equal = False
 
 
 if __name__ == "__main__":
